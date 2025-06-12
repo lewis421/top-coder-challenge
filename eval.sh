@@ -77,12 +77,14 @@ for ((i=0; i<num_cases; i++)); do
     if [ $((i % 100)) -eq 0 ]; then
         echo "Progress: $i/$num_cases cases processed..." >&2
     fi
+
+    echo "Processing case $((i+1)) of $num_cases..."
     
     # Extract test case data from pre-loaded array
     IFS=':' read -r trip_duration miles_traveled receipts_amount expected <<< "${test_cases[i]}"
     
     # Run the user's implementation
-    if script_output=$(./run.sh "$trip_duration" "$miles_traveled" "$receipts_amount" 2>/dev/null); then
+    if script_output=$(./run.sh "$trip_duration" "$miles_traveled" "$receipts_amount"); then
         # Check if output is a valid number
         output=$(echo "$script_output" | tr -d '[:space:]')
         if [[ $output =~ ^-?[0-9]+\.?[0-9]*$ ]]; then
@@ -105,7 +107,8 @@ for ((i=0; i<num_cases; i++)); do
             if (( $(echo "$error < 1.0" | bc -l) )); then
                 close_matches=$((close_matches + 1))
             fi
-            
+            echo "Case $((i+1)): Expected: \$${expected}, Got: \$${actual}, Error: \$${error}"
+
             # Update total error
             total_error=$(echo "scale=10; $total_error + $error" | bc)
             
